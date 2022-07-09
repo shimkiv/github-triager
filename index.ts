@@ -14,18 +14,22 @@ interface Label {
   default: boolean | undefined
 }
 
+// The following labels should be created within the target GitHub repository
 const backlog = 'backlog'
 const triage = 'triage'
-const orgs = process.env.GIT_HUB_ORGS?.split(',') || []
 
+const gitHubTargetOrgs = process.env.GIT_HUB_TARGET_ORGS?.split(',') || []
+const gitHubTargetOwner = process.env.GIT_HUB_TARGET_OWNER || ''
+const gitHubTargetRepo = process.env.GIT_HUB_TARGET_REPO || ''
 const gitHubApiToken = process.env.GIT_HUB_ACCESS_TOKEN || ''
-const MyOctokit = Octokit.plugin(paginateRest)
-const octokit = new MyOctokit({auth: gitHubApiToken})
+
+const _Octokit = Octokit.plugin(paginateRest)
+const octokit = new _Octokit({auth: gitHubApiToken})
 
 const getOwners = async (): Promise<Set<string>> => {
   const ownerSet = new Set<string>()
 
-  for (const org of orgs) {
+  for (const org of gitHubTargetOrgs) {
     const teams = await octokit.request('GET /orgs/{org}/teams', {
       org,
     })
@@ -51,8 +55,8 @@ let _backlogCounter = 0
 const owners = Array.from((await getOwners()).values())
 
 for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo}/issues', {
-  owner: process.env.GIT_HUB_TARGET_OWNER || '',
-  repo: process.env.GIT_HUB_TARGET_REPO || '',
+  owner: gitHubTargetOwner,
+  repo: gitHubTargetRepo,
 })) {
   for (const issue of response.data) {
     if (
@@ -67,9 +71,10 @@ for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo
       if (!labels.includes(triageLabel)) {
         owners.includes(issue.user!.login) ? _backlogCounter++ : _triageCounter++
 
+        // TODO: Uncomment once discussed with the team.
         // await octokit.request('PUT /repos/{owner}/{repo}/issues/{issue_number}/labels', {
-        //   owner: process.env.GIT_HUB_TARGET_OWNER || '',
-        //   repo: process.env.GIT_HUB_TARGET_REPO || '',
+        //   owner: gitHubTargetOwner,
+        //   repo: gitHubTargetRepo,
         //   issue_number: issue.number,
         //   labels: [triageLabel],
         // })
