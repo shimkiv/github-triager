@@ -1,0 +1,9 @@
+# project specific
+dist
+build
+coverage
+.*
+
+# whitelist
+!/.eslintrc.js
+!/.prettierrc.js

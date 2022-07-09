@@ -1,0 +1,49 @@
+{
+  "name": "github-triager",
+  "version": "0.1.0",
+  "description": "GitHub Triager",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "prepare": "husky install",
+    "build": "echo \"This is not a production-ready application, simply run 'yarn start' instead.\" && exit 1",
+    "dist": "echo \"This is not a production-ready application, simply run 'yarn start' instead.\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf ./target && rimraf ./logs && rimraf ./dist && rimraf ./test-results",
+    "triage": "node --loader ts-node/esm index.ts",
+    "lint": "yarn prettier && yarn prettier-check && yarn eslint && yarn tsc && yarn clean",
+    "eslint": "eslint . --ext .js,.ts --quiet --fix",
+    "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts}\"",
+    "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
+    "upgrade-deps": "ncu -u && yarn upgrade-interactive --latest"
+  },
+  "devDependencies": {
+    "@octokit/types": "^6.39.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/jest": "^28.1.4",
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^18.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.19.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.1",
+    "jest": "^28.1.2",
+    "nodemon": "^2.0.19",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.8.2"
+  },
+  "dependencies": {
+    "@octokit/core": "^4.0.4",
+    "@octokit/plugin-paginate-rest": "^3.0.0",
+    "debug": "^4.3.4",
+    "dotenv": "^16.0.1",
+    "lodash": "^4.17.21",
+    "typescript": "^4.7.4"
+  }
+}
