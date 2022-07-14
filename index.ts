@@ -90,6 +90,7 @@ for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo
           if (!labels.includes(labelToAdd)) {
             labelsToAdd.push(stale)
           }
+          
           owners.includes(issue.user!.login) ? _staleBacklogCounter++ : _staleTriageCounter++
           _staleTotalCounter++
         }
