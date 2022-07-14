@@ -1,5 +1,5 @@
-import {Octokit} from '@octokit/core'
-import {paginateRest} from '@octokit/plugin-paginate-rest'
+import { Octokit } from '@octokit/core'
+import { paginateRest } from '@octokit/plugin-paginate-rest'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -15,13 +15,17 @@ interface Label {
 }
 
 // The following labels should be created within the target GitHub repository
-const backlog = 'backlog'
+const stale = 'stale'
 const triage = 'triage'
+const backlog = 'backlog'
 
 const gitHubTargetOrgs = process.env.GIT_HUB_TARGET_ORGS?.split(',') || []
 const gitHubTargetOwner = process.env.GIT_HUB_TARGET_OWNER || ''
 const gitHubTargetRepo = process.env.GIT_HUB_TARGET_REPO || ''
 const gitHubApiToken = process.env.GIT_HUB_ACCESS_TOKEN || ''
+
+const staleIssueComparisonDate = new Date(process.env.STALE_ISSUE_COMPARISON_DATE || '')
+staleIssueComparisonDate.setHours(0, 0, 0, 0)
 
 const _Octokit = Octokit.plugin(paginateRest)
 const octokit = new _Octokit({auth: gitHubApiToken})
@@ -52,6 +56,11 @@ const getOwners = async (): Promise<Set<string>> => {
 let _totalCounter = 0
 let _triageCounter = 0
 let _backlogCounter = 0
+
+let _staleTotalCounter = 0
+let _staleTriageCounter = 0
+let _staleBacklogCounter = 0
+
 const owners = Array.from((await getOwners()).values())
 
 for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo}/issues', {
@@ -64,19 +73,33 @@ for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo
       (issue.assignee === null || issue.assignee === undefined) &&
       (issue.pull_request === null || issue.pull_request === undefined)
     ) {
-      const triageLabel = owners.includes(issue.user!.login) ? backlog : triage
+      const labelsToAdd = new Array<string>()
+      const labelToAdd = owners.includes(issue.user!.login) ? backlog : triage
+
       const labelObjects: Array<Label> = JSON.parse(JSON.stringify(issue.labels))
       const labels = labelObjects.map((label) => label.name)
 
-      if (!labels.includes(triageLabel)) {
+      const issueUpdateDate = new Date(issue.updated_at)
+      issueUpdateDate.setHours(0, 0, 0, 0)
+
+      if (!labels.includes(labelToAdd)) {
+        labelsToAdd.push(labelToAdd)
         owners.includes(issue.user!.login) ? _backlogCounter++ : _triageCounter++
+        
+        if (issueUpdateDate.getTime() < staleIssueComparisonDate.getTime()) {
+          if (!labels.includes(labelToAdd)) {
+            labelsToAdd.push(stale)
+          }
+          owners.includes(issue.user!.login) ? _staleBacklogCounter++ : _staleTriageCounter++
+          _staleTotalCounter++
+        }
 
         // TODO: Uncomment once discussed with the team.
         // await octokit.request('PUT /repos/{owner}/{repo}/issues/{issue_number}/labels', {
         //   owner: gitHubTargetOwner,
         //   repo: gitHubTargetRepo,
         //   issue_number: issue.number,
-        //   labels: [triageLabel],
+        //   labels: labelsToAdd,
         // })
       }
     }
@@ -91,9 +114,16 @@ console.log('=================== COMPLETED ====================')
 console.log('==================================================')
 console.log('')
 console.log(`Total Issues Processed: ${_totalCounter}`)
+console.log(`>> Stale:               ${_staleTotalCounter} (last time updated before: ${staleIssueComparisonDate})`)
+console.log('')
 console.log(`>> Goes To Backlog:     ${_backlogCounter}`)
+console.log(`>>   of them Stale:     ${_staleBacklogCounter}`)
+console.log('')
 console.log(`>> To Be Triaged:       ${_triageCounter}`)
+console.log(`>>   of them Stale:     ${_staleTriageCounter}`)
+console.log('')
 console.log(`>> No Action Required:  ${_totalCounter - (_backlogCounter + _triageCounter)}`)
+console.log(`>>   of them Stale      ${_staleTotalCounter - (_staleBacklogCounter + _staleTriageCounter)}`)
 console.log('')
 console.log('==================================================')
 console.log('')
