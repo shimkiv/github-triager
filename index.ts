@@ -98,12 +98,14 @@ for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo
         }
 
         if (additionalLabels.length > 0) {
-          await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
-            owner: gitHubTargetOwner,
-            repo: gitHubTargetRepo,
-            issue_number: issue.number,
-            labels: additionalLabels,
-          })
+          if (!process.env.DRY_RUN) {
+            await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+              owner: gitHubTargetOwner,
+              repo: gitHubTargetRepo,
+              issue_number: issue.number,
+              labels: additionalLabels,
+            })
+          }
         }
       }
     }
@@ -116,6 +118,8 @@ console.log('')
 console.log('==================================================')
 console.log('=================== COMPLETED ====================')
 console.log('==================================================')
+console.log('')
+console.log(`Dry Run: ${process.env.DRY_RUN ? 'Yes' : 'No'}`)
 console.log('')
 console.log(`Total Issues Processed: ${_totalCounter}`)
 console.log(`>> Stale Issues       : ${_staleTotalCounter} (last time updated before: ${staleIssueComparisonDate})`)
