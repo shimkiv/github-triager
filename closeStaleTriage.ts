@@ -1,18 +1,9 @@
 import {Octokit} from '@octokit/core'
 import {paginateRest} from '@octokit/plugin-paginate-rest'
 import dotenv from 'dotenv'
+import {Label} from './Model'
 
 dotenv.config()
-
-interface Label {
-  id: number | undefined
-  node_id: string | undefined
-  url: string | undefined
-  name: string | undefined
-  description: string | null | undefined
-  color: string | null | undefined
-  default: boolean | undefined
-}
 
 const stale = 'stale'
 const triage = 'triage'

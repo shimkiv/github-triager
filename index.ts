@@ -1,18 +1,9 @@
 import {Octokit} from '@octokit/core'
 import {paginateRest} from '@octokit/plugin-paginate-rest'
 import dotenv from 'dotenv'
+import {Label} from './Model'
 
 dotenv.config()
-
-interface Label {
-  id: number | undefined
-  node_id: string | undefined
-  url: string | undefined
-  name: string | undefined
-  description: string | null | undefined
-  color: string | null | undefined
-  default: boolean | undefined
-}
 
 // The following labels should be created within the target GitHub repository
 const stale = 'stale'
@@ -62,7 +53,6 @@ let _staleTriageCounter = 0
 let _staleBacklogCounter = 0
 
 const owners = Array.from((await getOwners()).values())
-//owners.push('matheus-o1labs')
 
 for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo}/issues', {
   owner: gitHubTargetOwner,
