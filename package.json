@@ -11,6 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf ./target && rimraf ./logs && rimraf ./dist && rimraf ./test-results",
     "triage": "node --loader ts-node/esm index.ts",
+    "close-stale-triage": "node --loader ts-node/esm closeStaleTriage.ts",
     "dry-run": "DRY_RUN=true yarn triage",
     "lint": "yarn prettier && yarn prettier-check && yarn eslint && yarn tsc && yarn clean",
     "eslint": "eslint . --ext .js,.ts --quiet --fix",

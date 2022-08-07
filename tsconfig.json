@@ -28,6 +28,7 @@
     "model/**/*",
     "logger/**/*",
     "config/**/*",
-    "index.ts"
+    "index.ts",
+    "closeStaleTriage.ts"
   ]
 }

@@ -1,5 +1,5 @@
-import { Octokit } from '@octokit/core'
-import { paginateRest } from '@octokit/plugin-paginate-rest'
+import {Octokit} from '@octokit/core'
+import {paginateRest} from '@octokit/plugin-paginate-rest'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -92,7 +92,7 @@ for await (const response of octokit.paginate.iterator('GET /repos/{owner}/{repo
           if (!labels.includes(stale)) {
             additionalLabels.push(stale)
           }
-          
+
           owners.includes(issue.user!.login) ? _staleBacklogCounter++ : _staleTriageCounter++
           _staleTotalCounter++
         }
@@ -122,7 +122,9 @@ console.log('')
 console.log(`Dry Run: ${process.env.DRY_RUN ? 'Yes' : 'No'}`)
 console.log('')
 console.log(`Total Issues Processed: ${_totalCounter}`)
-console.log(`>> Stale Issues       : ${_staleTotalCounter} (last time updated before: ${staleIssueComparisonDate})`)
+console.log(
+  `>> Stale Issues       : ${_staleTotalCounter} (last time updated before: ${staleIssueComparisonDate})`,
+)
 console.log(`>>   of them Backlog  : ${_staleBacklogCounter}`)
 console.log(`>>   of them Triage   : ${_staleTriageCounter}`)
 console.log('')
@@ -130,7 +132,9 @@ console.log(`>> Goes To Backlog    : ${_backlogCounter}`)
 console.log(`>> To Be Triaged      : ${_triageCounter}`)
 console.log('')
 console.log(`>> No Action Required : ${_totalCounter - (_backlogCounter + _triageCounter)}`)
-console.log(`>>   of them Stale    : ${_staleTotalCounter - (_staleBacklogCounter + _staleTriageCounter)}`)
+console.log(
+  `>>   of them Stale    : ${_staleTotalCounter - (_staleBacklogCounter + _staleTriageCounter)}`,
+)
 console.log('')
 console.log('==================================================')
 console.log('')
